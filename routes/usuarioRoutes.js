@@ -8,14 +8,19 @@ import {
   resetPassword,
   comprobarToken,
   nuevoPassword,
+  autenticar,
 } from "../controllers/usuarioController.js";
 
 const router = express();
 
 router.get("/login", formularioLogin);
+router.post("/login", autenticar);
+
 router.get("/registro", formularioRegistro);
 router.post("/registro", registrar);
+
 router.get("/confirmar/:token", confirmar);
+
 router.get("/olvide-password", formularioOlvidePassword);
 router.post("/olvide-password", resetPassword);
 

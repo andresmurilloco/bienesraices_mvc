@@ -1,6 +1,6 @@
 import { check, validationResult } from "express-validator";
 import Usuario from "../models/Usuario.js";
-import { generarId } from "../helpers/token.js";
+import { generarId, generarJWT } from "../helpers/token.js";
 import { emailOlvidePassword, emailRegistro } from "../helpers/emails.js";
 import bcrypt from "bcrypt";
 
@@ -8,7 +8,74 @@ const formularioLogin = (req, res) => {
   res.render("auth/login", {
     autenticado: true,
     pagina: "Iniciar sesión",
+    csrfToken: req.csrfToken(),
   });
+};
+
+const autenticar = async (req, res) => {
+  //Validación
+
+  await check("email")
+    .isEmail()
+    .withMessage("El email es obligatorio")
+    .run(req);
+
+  await check("password")
+    .notEmpty()
+    .withMessage("La contraseña es obligatoria")
+    .run(req);
+
+  let resultado = validationResult(req);
+
+  //Verificar resultado vacío
+  if (!resultado.isEmpty()) {
+    return res.render("auth/login", {
+      pagina: "Iniciar sesión",
+      csrfToken: req.csrfToken(),
+      errores: resultado.array(),
+    });
+  }
+
+  //Comprobar que usuario existe
+  const { email, password } = req.body;
+
+  const usuario = await Usuario.findOne({ where: { email } });
+  if (!usuario) {
+    return res.render("auth/login", {
+      pagina: "Iniciar sesión",
+      csrfToken: req.csrfToken(),
+      errores: [{ msg: "El usuario no existe" }],
+    });
+  }
+
+  //Comprobar si usuario confirmado
+  if (!usuario.confirmado) {
+    return res.render("auth/login", {
+      pagina: "Iniciar sesión",
+      csrfToken: req.csrfToken(),
+      errores: [{ msg: "Tu cuenta no ha sido confirmada" }],
+    });
+  }
+
+  //Comprobar contraseña
+  if (!usuario.verificarPassword(password)) {
+    return res.render("auth/login", {
+      pagina: "Iniciar sesión",
+      csrfToken: req.csrfToken(),
+      errores: [{ msg: "Contraseña incorrecta" }],
+    });
+  }
+
+  //Autentucar usuario
+  const token = generarJWT({ id: usuario.id, nombre: usuario.nombre });
+
+  //Almacenar cookies
+  return res
+    .cookie("_token", token, {
+      httpOnly: true,
+      // secure: true,
+    })
+    .redirect("/mis_propiedades");
 };
 
 const formularioRegistro = (req, res) => {
@@ -233,4 +300,5 @@ export {
   resetPassword,
   comprobarToken,
   nuevoPassword,
+  autenticar,
 };
