@@ -27,7 +27,7 @@ try {
 
 //Habilitar pug
 app.set("view engine", "pug");
-app.set("view", "./views");
+app.set("views", "./views");
 
 //Carpeta publica
 app.use(express.static("public"));
