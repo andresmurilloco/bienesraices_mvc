@@ -1,5 +1,5 @@
 import { validationResult } from "express-validator";
-import { Precio, Categoria, Propiedad } from "../models/index.js";
+import { Precio, Categoria, Propiedad, Usuario } from "../models/index.js";
 
 const admin = (req, res) => {
   res.render("propiedades/admin", {
@@ -58,6 +58,8 @@ const guardar = async (req, res) => {
     precio: precioId,
     categoria: categoriaId,
   } = req.body;
+  const { id: usuarioId } = req.usuario;
+
   try {
     const propiedadGuardada = await Propiedad.create({
       titulo,
@@ -70,6 +72,8 @@ const guardar = async (req, res) => {
       lng,
       precioId,
       categoriaId,
+      usuarioId,
+      imagen: "",
     });
   } catch (error) {
     console.log(error);

@@ -75,7 +75,7 @@ const autenticar = async (req, res) => {
       httpOnly: true,
       // secure: true,
     })
-    .redirect("/mis_propiedades");
+    .redirect("/mis-propiedades");
 };
 
 const formularioRegistro = (req, res) => {
