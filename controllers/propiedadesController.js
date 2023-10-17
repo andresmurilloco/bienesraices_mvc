@@ -75,6 +75,8 @@ const guardar = async (req, res) => {
       usuarioId,
       imagen: "",
     });
+    const { id } = propiedadGuardada;
+    res.redirect(`/propiedades/agregar-imagen/${id}`);
   } catch (error) {
     console.log(error);
   }
